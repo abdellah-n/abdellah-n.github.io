@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AERO//NEXUS — SC-01 Apex Hyper-Cruiser 3D Showcase</title>
+    <meta name="description" content="Next-generation interactive WebGL sci-fi vehicle showcase featuring real-time 3D aerodynamics, customizable flight telemetry, and futuristic HUD experience." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/aerospace-3d-showcase/assets/index-BWMqMXMc.js"></script>
+    <link rel="stylesheet" crossorigin href="/aerospace-3d-showcase/assets/index-b_lmQvm5.css">
+  </head>
+  <body>
+    <!-- 3D Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Minimal Preloader -->
+    <div id="preloader" class="preloader-overlay">
+      <div class="preloader-content">
+        <div class="preloader-bar-wrap">
+          <div class="preloader-bar-track">
+            <div id="preloader-progress" class="preloader-bar-fill"></div>
+          </div>
+          <div class="preloader-bar-footer">
+            <span id="preloader-status" class="preloader-status-text">INITIALIZING...</span>
+            <span id="preloader-pct" class="preloader-pct-text">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Scanline & Ambient Vignette FX -->
+    <div class="hud-overlay" aria-hidden="true">
+      <div class="hud-scanlines"></div>
+      <div class="hud-grid-dots"></div>
+    </div>
+
+    <!-- Precision HUD Corner Reticles -->
+    <div class="hud-reticle hud-tl" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 18V2H18" stroke="currentColor" stroke-width="2"/>
+        <path d="M2 2L8 8" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.6"/>
+        <circle cx="2" cy="2" r="1.5" fill="currentColor"/>
+        <text x="12" y="28" fill="currentColor" font-size="7" font-family="'Orbitron', monospace" letter-spacing="1">SYS:01</text>
+      </svg>
+    </div>
+    <div class="hud-reticle hud-tr" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 18V2H30" stroke="currentColor" stroke-width="2"/>
+        <path d="M46 2L40 8" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.6"/>
+        <circle cx="46" cy="2" r="1.5" fill="currentColor"/>
+        <text x="6" y="28" fill="currentColor" font-size="7" font-family="'Orbitron', monospace" letter-spacing="1">LAT:99</text>
+      </svg>
+    </div>
+    <div class="hud-reticle hud-bl" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 30V46H18" stroke="currentColor" stroke-width="2"/>
+        <path d="M2 46L8 40" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.6"/>
+        <circle cx="2" cy="46" r="1.5" fill="currentColor"/>
+        <text x="12" y="24" fill="currentColor" font-size="7" font-family="'Orbitron', monospace" letter-spacing="1">RAD:OK</text>
+      </svg>
+    </div>
+    <div class="hud-reticle hud-br" aria-hidden="true">
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M46 30V46H30" stroke="currentColor" stroke-width="2"/>
+        <path d="M46 46L40 40" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.6"/>
+        <circle cx="46" cy="46" r="1.5" fill="currentColor"/>
+        <text x="10" y="24" fill="currentColor" font-size="7" font-family="'Orbitron', monospace" letter-spacing="1">SEC:A1</text>
+      </svg>
+    </div>
+
+    <!-- Aerospace Navigation Bar -->
+    <header class="nav">
+      <div class="nav-brand-group">
+        <a class="nav-logo" href="#" id="brand-logo" title="AERO//NEXUS Vehicle Dynamics">
+          <div class="logo-icon-wrapper">
+            <svg class="logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="16,2 30,26 24,26 16,11 8,26 2,26" fill="url(#brand-grad)" />
+              <polygon points="16,14 22,25 10,25" fill="#060610" />
+              <circle cx="16" cy="20" r="2" fill="#ffd98a" />
+              <defs>
+                <linearGradient id="brand-grad" x1="2" y1="2" x2="30" y2="26" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ffd98a"/>
+                  <stop offset="0.5" stop-color="#ffbe6f"/>
+                  <stop offset="1" stop-color="#f9f06b"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="logo-glow"></span>
+          </div>
+          <div class="logo-text-block">
+            <span class="nav-logo-text">AERO<span>//</span>NEXUS</span>
+            <span class="nav-subtag">AEROSPACE DYNAMICS LAB</span>
+          </div>
+        </a>
+
+        <!-- Live Status Pill -->
+        <div class="nav-status-pill" id="telemetry-pill">
+          <span class="status-dot"></span>
+          <span class="status-text">LINK: ONLINE // 60 FPS</span>
+        </div>
+      </div>
+
+      <nav class="nav-links" id="main-nav">
+        <button class="nav-link-btn active" data-tab="overview" id="nav-overview">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l7 4v6l-7 4-7-4V5l7-4zm0 2.2L3 6v4l5 2.8 5-2.8V6L8 3.2z"/></svg>
+          <span>Overview</span>
+        </button>
+        <button class="nav-link-btn" data-tab="specs" id="nav-specs">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2V3zm0 4h12v2H2V7zm0 4h8v2H2v-2z"/></svg>
+          <span>Telemetry</span>
+        </button>
+        <button class="nav-link-btn" data-tab="blueprints" id="nav-blueprints">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M14 2H2a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1V3a1 1 0 00-1-1zM3 12V4h10v8H3zm2-6h6v1H5V6zm0 2h6v1H5V8zm0 2h4v1H5v-1z"/></svg>
+          <span>Blueprints</span>
+        </button>
+        <button class="nav-link-btn" data-tab="flightdeck" id="nav-flightdeck">
+          <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 2a6 6 0 015.93 5H9.9A4 4 0 008 4V2zm-1 2v2a4 4 0 00-1.9 3H2.07A6 6 0 017 4zM2.07 9H6.1A4 4 0 008 12v2a6 6 0 01-5.93-5zm7.83 0h4.03A6 6 0 018 14v-2a4 4 0 001.9-3z"/></svg>
+          <span>Controls</span>
+        </button>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Audio Synth FX Toggle -->
+        <button class="audio-toggle-btn" id="audio-toggle" title="Toggle Sci-Fi Synth Audio">
+          <span class="audio-bars" aria-hidden="true">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+          </span>
+          <span class="audio-label">AUDIO FX</span>
+        </button>
+
+        <!-- Access CTA -->
+        <a class="nav-cta" href="#blueprints" id="cta-access-btn">
+          <svg class="cta-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0L6.6 1.4 12.2 7H0v2h12.2l-5.6 5.6L8 16l8-8-8-8z"/></svg>
+          <span>LAUNCH SIM</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Split Layout Container -->
+    <main class="app-layout">
+      <!-- LEFT SECTION: Sci-Fi Hero & Telemetry Cockpit -->
+      <section class="left-section" id="hero-left-panel">
+        <!-- Classification Badge -->
+        <div class="hero-chip-badge">
+          <span class="chip-pulse"></span>
+          <svg class="chip-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0l2.5 5 5.5.8-4 3.9.9 5.3-4.9-2.6-4.9 2.6.9-5.3-4-3.9 5.5-.8L8 0z"/></svg>
+          <span class="chip-text">SC-01 // EXPERIMENTAL HYPER-CRUISER</span>
+          <span class="chip-code">VER 4.8.2</span>
+        </div>
+
+        <!-- Main Title -->
+        <div class="title-container">
+          <h1 class="hero-title">
+            <span class="title-sub">THE FUTURE</span>
+            <span class="title-main">TAKES FLIGHT</span>
+          </h1>
+          <div class="title-glow-line" aria-hidden="true"></div>
+        </div>
+
+        <!-- Description -->
+        <p class="hero-subtitle">
+          Engineered for orbital velocity and atmospheric hyper-glide. Powered by zero-point quantum plasma with real-time vector thrust aerodynamics.
+        </p>
+
+        <!-- Drive Mode Switcher -->
+        <div class="drive-modes-panel">
+          <span class="modes-label">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zM0 8a8 8 0 1116 0A8 8 0 010 8z"/></svg>
+            PROPULSION MODE:
+          </span>
+          <div class="modes-list" role="tablist">
+            <button class="mode-btn active" data-mode="cruise" id="mode-cruise" role="tab" aria-selected="true">
+              <svg class="mode-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8a7 7 0 1114 0A7 7 0 011 8zm7-5a5 5 0 100 10A5 5 0 008 3z"/></svg>
+              <span>CRUISE</span>
+            </button>
+            <button class="mode-btn" data-mode="hyper" id="mode-hyper" role="tab" aria-selected="false">
+              <svg class="mode-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M9 1L3 9h4l-1 6 6-8h-4l1-6z"/></svg>
+              <span>HYPERDRIVE</span>
+            </button>
+            <button class="mode-btn" data-mode="stealth" id="mode-stealth" role="tab" aria-selected="false">
+              <svg class="mode-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 00-7 7v4l7 4 7-4V8a7 7 0 00-7-7zm0 2a5 5 0 015 5v3.3L8 14.2 3 11.3V8a5 5 0 015-5z"/></svg>
+              <span>STEALTH</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="btn-explore">
+            <span class="btn-cutout"></span>
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-1 11.5v-7l5 3.5-5 3.5z"/>
+            </svg>
+            <span>ENGAGE VEHICLE</span>
+            <span class="btn-sheen"></span>
+          </button>
+          <button class="btn btn-secondary" id="btn-blueprints">
+            <span class="btn-cutout"></span>
+            <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v10H4V5zm2 2v2h8V7H6zm0 4v2h5v-2H6z"/>
+            </svg>
+            <span>SYSTEM BLUEPRINTS</span>
+          </button>
+        </div>
+
+        <!-- Live Telemetry Stats Grid -->
+        <div class="telemetry-grid">
+          <!-- Stat 1 -->
+          <div class="stat-card" id="stat-card-speed">
+            <div class="stat-header">
+              <span class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+              </span>
+              <span class="stat-tag">TOP VELOCITY</span>
+            </div>
+            <div class="stat-value-row">
+              <strong class="stat-value" id="val-speed">1,480</strong>
+              <span class="stat-unit">KM/H</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" style="width: 82%;"></div></div>
+            <span class="stat-sub">MACH 4.3 // ATMOSPHERIC</span>
+          </div>
+
+          <!-- Stat 2 -->
+          <div class="stat-card" id="stat-card-thrust">
+            <div class="stat-header">
+              <span class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+              </span>
+              <span class="stat-tag">PLASMA THRUST</span>
+            </div>
+            <div class="stat-value-row">
+              <strong class="stat-value" id="val-thrust">2.4K</strong>
+              <span class="stat-unit">kN</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-fill stat-bar-amber" style="width: 94%;"></div></div>
+            <span class="stat-sub">DUAL VECTOR NOZZLE</span>
+          </div>
+
+          <!-- Stat 3 -->
+          <div class="stat-card" id="stat-card-range">
+            <div class="stat-header">
+              <span class="stat-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.083-8-12.178-8-5.096 0-5.096 8 0 8 5.095 0 7.083-8 12.178-8z"/>
+                </svg>
+              </span>
+              <span class="stat-tag">QUANTUM FLUX</span>
+            </div>
+            <div class="stat-value-row">
+              <strong class="stat-value" id="val-range">∞</strong>
+              <span class="stat-unit">ZERO-PT</span>
+            </div>
+            <div class="stat-bar-track"><div class="stat-bar-fill stat-bar-cyan" style="width: 100%;"></div></div>
+            <span class="stat-sub">FUSION HARVEST CORE</span>
+          </div>
+        </div>
+
+        <!-- Live Ticker Readout -->
+        <div class="telemetry-ticker">
+          <span class="ticker-beacon"></span>
+          <span class="ticker-text" id="telemetry-ticker-text">ALTITUDE: 12,400M // PITCH: +2.4° // SHIELDING: 100% // FLIGHT MATRIX: CALIBRATED</span>
+        </div>
+      </section>
+
+      <!-- RIGHT SECTION: Interactive 3D WebGL Canvas Viewport & Floating HUD Overlays -->
+      <section class="right-section" id="viewport-right-panel">
+        <!-- Floating Viewport Telemetry Badge -->
+        <div class="viewport-hud-top">
+          <div class="hud-tag-box">
+            <span class="tag-title">3D VIEWPORT</span>
+            <span class="tag-meta" id="camera-fov-tag">FOV: 45°</span>
+          </div>
+          <div class="camera-pov-selector" role="toolbar" aria-label="Camera Presets">
+            <button class="cam-preset-btn active" data-pov="hero" title="Hero Isometric View" id="pov-hero-btn">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l6 3.5v6l-6 3.5-6-3.5v-6l6-3.5zm0 1.7L3.5 5.9v4.2L8 12.8l4.5-2.7V5.9L8 3.2z"/></svg>
+              <span>HERO</span>
+            </button>
+            <button class="cam-preset-btn" data-pov="front" title="Front Aerodynamic View" id="pov-front-btn">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2l5 9H3l5-9zm0 3.5L5.5 9h5L8 5.5z"/></svg>
+              <span>FRONT</span>
+            </button>
+            <button class="cam-preset-btn" data-pov="top" title="Overhead Tactical Scan" id="pov-top-btn">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 2a6 6 0 110 12A6 6 0 018 2zm0 3a3 3 0 100 6 3 3 0 000-6z"/></svg>
+              <span>TOP SCAN</span>
+            </button>
+            <button class="cam-preset-btn" data-action="replay" title="Replay Cinematic Intro" id="pov-replay-btn">
+              <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 104.546 2.914.5.5 0 01.908-.418A6 6 0 118 2v1zm0-3l3 2.5-3 2.5V0z"/></svg>
+              <span>CINEMATIC</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Target Reticle Center Widget -->
+        <div class="hud-target-reticle" id="hud-car-reticle" aria-hidden="true">
+          <div class="reticle-ring"></div>
+          <div class="reticle-cross"></div>
+          <div class="reticle-label">LOCKED: SC-01</div>
+        </div>
+
+        <!-- Floating Interaction Guide Prompt -->
+        <div class="viewport-gesture-hint">
+          <div class="mouse-icon-wrap">
+            <svg class="mouse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="5" y="2" width="14" height="20" rx="7"/>
+              <path d="M12 6v4" class="mouse-wheel"/>
+            </svg>
+          </div>
+          <div class="hint-text">
+            <span class="hint-title">INTERACTIVE WEBGL</span>
+            <span class="hint-desc">DRAG TO ORBIT // SCROLL TO ZOOM</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Interactive System Blueprints Modal / Drawer -->
+    <div class="modal-backdrop" id="blueprints-modal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <svg class="modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+            <div>
+              <h2 class="modal-title">AERO//NEXUS SC-01 SCHEMATICS</h2>
+              <span class="modal-subtitle">TACTICAL SPECIFICATIONS & PROPULSION ARCHITECTURE</span>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="modal-close-btn" title="Close Schematics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-grid">
+            <!-- Spec Card 1 -->
+            <div class="modal-spec-card">
+              <div class="spec-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              </div>
+              <h3>Dual-Stage Ion Fusion</h3>
+              <p>Generates 2,400 kN of continuous vector thrust with magnetic plasma containment coils.</p>
+              <div class="spec-stat-row"><span>EFFICIENCY</span><strong>99.84%</strong></div>
+            </div>
+
+            <!-- Spec Card 2 -->
+            <div class="modal-spec-card">
+              <div class="spec-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <h3>Graphene-Alloy Aero Shell</h3>
+              <p>Ultra-light monocoque chassis engineered to resist atmospheric friction temperatures exceeding 3,000°C.</p>
+              <div class="spec-stat-row"><span>MASS REDUCTION</span><strong>-68%</strong></div>
+            </div>
+
+            <!-- Spec Card 3 -->
+            <div class="modal-spec-card">
+              <div class="spec-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <h3>Neural Flight Matrix</h3>
+              <p>Sub-millisecond autopilot computing 1.2 billion trajectory adjustments per second in high-G maneuvers.</p>
+              <div class="spec-stat-row"><span>LATENCY</span><strong>0.14 ms</strong></div>
+            </div>
+
+            <!-- Spec Card 4 -->
+            <div class="modal-spec-card">
+              <div class="spec-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+              </div>
+              <h3>Anti-Gravity Repulsor Grid</h3>
+              <p>Zero-point energy manifold cancels 98.6% of gravitational drag for near-frictionless hover.</p>
+              <div class="spec-stat-row"><span>HOVER CEILING</span><strong>FL-800</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="modal-engage-btn">ENGAGE SIMULATOR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Module Script -->
+  </body>
+</html>
